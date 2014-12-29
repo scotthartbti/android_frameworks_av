@@ -1394,12 +1394,15 @@ bool NuPlayer::Renderer::onOpenAudioSink(
     pcmOffload = ExtendedUtils::isPcmOffloadEnabled() &&
             !strcasecmp(mime.c_str(), MEDIA_MIMETYPE_AUDIO_RAW);
 
+    int32_t resampled = 0;
+    format->findInt32("resampled", &resampled);
+
     // At this point we can check if PCM should be offloaded
-    if (!offloadingAudio() && (!offloadOnly && pcmOffload)) {
+    if (!offloadingAudio() && (!offloadOnly && pcmOffload && !resampled)) {
         sp<MetaData> aMeta = new MetaData;
         convertMessageToMetaData(format, aMeta);
         if  (canOffloadStream(aMeta, false, new MetaData,
-                    true, AUDIO_STREAM_MUSIC)) {
+                    hasVideo, AUDIO_STREAM_MUSIC)) {
             mFlags |= FLAG_OFFLOAD_AUDIO;
         }
     }
